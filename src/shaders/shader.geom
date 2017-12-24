@@ -106,7 +106,7 @@ void main() {
            s_bm = s_bp - vec4(2,0,0,0);
 
       // get triangle's normal
-      normal = cross(p_b - p_a, p_c - p_a);
+      normal = normalize(cross(p_b - p_a, p_c - p_a));
       if (dot(p_a, normal) > 0) {
         normal *= -1;
       }
@@ -139,7 +139,7 @@ void main() {
            s_polem = vec4(-1,     s_polep[1], s_polep[2], s_polep[3]),
            s_poleb = vec4(s_b[0], s_polep[1], s_polep[2], s_polep[3]);
 
-      normal = cross(p_b - p_a, p_c - p_a);
+      normal = normalize(cross(p_b - p_a, p_c - p_a));
       if (dot(p_a, normal) > 0) {
         normal *= -1;
       }

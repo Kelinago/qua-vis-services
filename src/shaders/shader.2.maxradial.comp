@@ -1,7 +1,7 @@
 #version 450
 // image settings
-#define WIDTH 128 // each work item covers a patch of size (W/N)x(H/M)
-#define HEIGHT 64
+#define WIDTH 1024 // each work item covers a patch of size (W/N)x(H/M)
+#define HEIGHT 512
 
 // constants
 #define N_LOCAL 16

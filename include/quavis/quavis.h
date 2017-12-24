@@ -202,12 +202,12 @@ namespace quavis {
 
 
     // rendering attributes
-    const uint32_t render_width_ = 128;
-    const uint32_t render_height_ = 64;
-    const size_t workgroups[3] = {128, 1, 1};
+    const uint32_t render_width_ = 1024;
+    const uint32_t render_height_ = 512;
+    const size_t workgroups[3] = {1024, 1, 1};
     const size_t workgroups2[3] = {1, 1, 1};
     const size_t num_observation_points_x = 100;
-    const VkFormat color_format_ = VK_FORMAT_R32G32_SFLOAT;
+    const VkFormat color_format_ = VK_FORMAT_R32G32B32A32_SFLOAT;
     const VkFormat depth_stencil_format_ = VK_FORMAT_D32_SFLOAT;
 
     const uint32_t compute_size_ = sizeof(float);
@@ -223,7 +223,7 @@ namespace quavis {
 
     // debug attributes
     // TODO: Parse this parameter from command line arguments
-    bool imagesRequired = false;
+    bool imagesRequired = true;
   };
 }
 
