@@ -71,20 +71,23 @@ std::vector<float> Context::Parse(std::string contents, std::vector<vec3> analys
   // MAGIIC
   std::vector<float> results(observation_points.size());
   for (size_t i = 0; i < observation_points.size(); i++) {
-    this->uniform_.observation_point = observation_points[i];
-    this->SubmitUniformData();
-    vkQueueWaitIdle(this->vk_queue_graphics_);
-    this->VkDraw();
-    this->ResetResult();
-    vkQueueWaitIdle(this->vk_queue_graphics_);
-    this->VkCompute();
-    vkQueueWaitIdle(this->vk_queue_compute_);
-    results[i] = *(float*)this->RetrieveResult();
+    if (i == 15890) { // || i == 17600 || i == 22559 || i == 22560 || i == 22261 || i == 22067 || i == 20832) {
+      this->uniform_.observation_point = observation_points[i];
+      this->uniform_.observation_point.z = 60;
+      this->SubmitUniformData();
+      vkQueueWaitIdle(this->vk_queue_graphics_);
+      this->VkDraw();
+      this->ResetResult();
+      vkQueueWaitIdle(this->vk_queue_graphics_);
+      this->VkCompute();
+      vkQueueWaitIdle(this->vk_queue_compute_);
+      results[i] = *(float *) this->RetrieveResult();
 
-    if (imagesRequired) {
-      RetrieveRenderImage(i);
-      RetrieveDepthImage(i);
-      //RetrieveComputeImage(i);
+      if (imagesRequired) {
+        RetrieveRenderImage(i);
+        RetrieveDepthImage(i);
+        //RetrieveComputeImage(i);
+      }
     }
   }
   return results;
@@ -1647,15 +1650,32 @@ void Context::RetrieveRenderImage(uint32_t i) {
   vkMapMemory(this->vk_logical_device_, this->vk_color_staging_image_memory_, 0, image_size, 0, (void **)&data);
   memcpy(pixels, data, image_size);
   vkUnmapMemory(this->vk_logical_device_, this->vk_color_staging_image_memory_);
-  uint8_t image[this->render_width_ * this->render_height_];
-  for (uint32_t i = 0; i < 4 * this->render_width_ * this->render_height_; i += 4) {
+  uint8_t image[4 * this->render_width_ * this->render_height_];
+
+  for (uint32_t i = 0; i < 16 * this->render_width_ * this->render_height_; i += 4) {
     float px;
     memcpy(&px, (uint8_t*)pixels + i, 4);
     image[i/4] = floor(px*255);
+
+
+    /*
+    float r;
+    memcpy(&r, (uint8_t*)pixels + i, 4);
+    float g;
+    memcpy(&g, (uint8_t*)pixels + i + 4, 4);
+    float b;
+    memcpy(&b, (uint8_t*)pixels + i + 8, 4);
+    float a;
+    memcpy(&a, (uint8_t*)pixels + i + 12, 4);
+    //printf("i = %d, r = %f g = %f b = %f a = %f\n", i, r, g, b, a);
+    image[i/16] = (uint32_t)(r*255) << 32 | (uint32_t)(g*255) << 16 | (uint32_t)(b*255) << 4 | (uint32_t)(a*255);
+    */
+    //image[i] = px*255;
   }
+
   //int stbi_write_png(char const *filename, int w, int h, int comp, const void *data, int stride_in_bytes);
   std::string filename = "debug_images/render/" + std::to_string(i) + ".png";
-  stbi_write_png(filename.c_str(), this->render_width_, this->render_height_, 1, (void*)image, 0);
+  stbi_write_png(filename.c_str(), this->render_width_, this->render_height_, 4, (void*)image, 0);
   free(pixels);
   this->TransformImageLayout(this->vk_color_image_, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
 }
@@ -1690,7 +1710,7 @@ void Context::RetrieveDepthImage(uint32_t i) {
   for (uint32_t i = 0; i < 4 * this->render_width_ * this->render_height_; i += 4) {
     float px;
     memcpy(&px, (uint8_t*)pixels + i, 4);
-    image[i/4] = floor((px)*255);
+    image[i/4] = floor((1.0 - px)*255);
   }
 
   //int stbi_write_png(char const *filename, int w, int h, int comp, const void *data, int stride_in_bytes);
