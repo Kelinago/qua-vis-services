@@ -18,9 +18,20 @@ layout(location = 1) out vec3 tcColor[];
 void main()
 {
   tcCartesianPosition[ID] = vCartesianPosition[ID];
-  tcColor[ID] = vColor[ID];
-  gl_TessLevelInner[0] = 1;
-  gl_TessLevelOuter[0] = 1;
-  gl_TessLevelOuter[1] = 1;
-  gl_TessLevelOuter[2] = 1;
+  // tcColor[ID] = vColor[ID];
+    vec3 n0 = cross( vCartesianPosition[2] - vCartesianPosition[0]
+                   , vCartesianPosition[1] - vCartesianPosition[0]);
+    tcColor[ID] = normalize(n0 * sign(- dot(vCartesianPosition[0], n0)));
+
+  float l0 = length(vCartesianPosition[0]),
+        l1 = length(vCartesianPosition[1]),
+        l2 = length(vCartesianPosition[2]),
+        l01 = max(1.0f , acos( dot(vCartesianPosition[0],vCartesianPosition[1]) / (l0 * l1) ) / ubo.alpha_max),
+        l02 = max(1.0f , acos( dot(vCartesianPosition[0],vCartesianPosition[2]) / (l0 * l2) ) / ubo.alpha_max),
+        l12 = max(1.0f , acos( dot(vCartesianPosition[1],vCartesianPosition[2]) / (l1 * l2) ) / ubo.alpha_max);
+
+  gl_TessLevelInner[0] = max(l01, max(l02,l12));
+  gl_TessLevelOuter[0] = l12;
+  gl_TessLevelOuter[1] = l02;
+  gl_TessLevelOuter[2] = l01;
 }
